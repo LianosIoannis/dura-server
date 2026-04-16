@@ -1,0 +1,93 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../../src/prisma/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../ERD.svg"
+  theme    = "dark"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String?
+  email     String?  @unique
+  address   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  status          OrderStatus @default(PENDING)
+  problem         String
+  technicianNotes String?
+  intakeNotes     String?
+
+  deviceType   String?
+  deviceBrand  String?
+  deviceModel  String?
+  serialNumber String?
+
+  estimate   Float?
+  finalTotal Float?
+
+  invoiceStatus InvoiceStatus  @default(UNPAID)
+  invoiceDueAt  DateTime?
+  invoicePaidAt DateTime?
+  paymentMethod PaymentMethod?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerId Int
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
+  @@index([status])
+  @@index([invoiceStatus])
+}
+
+enum OrderStatus {
+  PENDING
+  DIAGNOSIS
+  WAITING_APPROVAL
+  IN_REPAIR
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  VOID
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  OTHER
+}

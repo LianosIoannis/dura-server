@@ -1,0 +1,88 @@
+<div class="bg-gray-900 flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+    <img src="/mark.svg" alt="Your Company" class="mx-auto h-10 w-auto" />
+    <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-white">
+      Sign up for your account
+    </h2>
+  </div>
+
+  <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+    <form [formRoot]="signupForm" class="space-y-6">
+      <div>
+        <label for="email" class="block text-sm/6 font-medium text-gray-100">
+          Email address
+        </label>
+        <div class="mt-2">
+          <input id="email" type="email" autocomplete="email" [formField]="signupForm.email"
+            class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+        </div>
+
+        @if (signupForm.email().touched() && signupForm.email().invalid()) {
+        <div class="mt-2 text-sm text-red-400">
+          @for (error of signupForm.email().errors(); track error) {
+          <p>{{ error.message }}</p>
+          }
+        </div>
+        }
+      </div>
+
+      <div>
+        <label for="name" class="block text-sm/6 font-medium text-gray-100">
+          Name
+        </label>
+        <div class="mt-2">
+          <input id="name" type="text" autocomplete="name" [formField]="signupForm.name"
+            class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+        </div>
+
+        @if (signupForm.name().touched() && signupForm.name().invalid()) {
+        <div class="mt-2 text-sm text-red-400">
+          @for (error of signupForm.name().errors(); track error) {
+          <p>{{ error.message }}</p>
+          }
+        </div>
+        }
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between">
+          <label for="password" class="block text-sm/6 font-medium text-gray-100">
+            Password
+          </label>
+          <div class="text-sm"></div>
+        </div>
+
+        <div class="mt-2">
+          <input id="password" type="password" autocomplete="new-password" [formField]="signupForm.password"
+            class="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6" />
+        </div>
+
+        @if (signupForm.password().touched() && signupForm.password().invalid()) {
+        <div class="mt-2 text-sm text-red-400">
+          @for (error of signupForm.password().errors(); track error) {
+          <p>{{ error.message }}</p>
+          }
+        </div>
+        }
+      </div>
+
+      <div>
+        <button type="submit" [disabled]="signupForm().invalid() || signupForm().submitting()"
+          class="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm/6 font-semibold text-white hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+          @if (signupForm().submitting()) {
+          Signing up...
+          } @else {
+          Sign up
+          }
+        </button>
+      </div>
+    </form>
+
+    <p class="mt-10 text-center text-sm/6 text-gray-400">
+      Already a member?
+      <span routerLink="/signin" class="font-semibold cursor-pointer text-indigo-400 hover:text-indigo-300">
+        Sign In
+      </span>
+    </p>
+  </div>
+</div>
