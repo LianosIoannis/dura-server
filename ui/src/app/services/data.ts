@@ -64,6 +64,12 @@ export class Data {
 		return (await res.json()) as T;
 	}
 
+	private async requestAndRefresh<T>(path: string, init: RequestInit, errorMessage: string): Promise<T> {
+		const result = await this.request<T>(path, init, errorMessage);
+		await this.loadAppData();
+		return result;
+	}
+
 	getCustomers(): Promise<Customer[]> {
 		return this.request<Customer[]>("/customer/all", {}, "Failed to fetch customers");
 	}
@@ -73,7 +79,7 @@ export class Data {
 	}
 
 	createCustomer(customer: CreateCustomerDto): Promise<Customer> {
-		return this.request<Customer>(
+		return this.requestAndRefresh<Customer>(
 			"/customer/create",
 			{
 				method: "POST",
@@ -84,7 +90,7 @@ export class Data {
 	}
 
 	createOrder(order: CreateOrderDto): Promise<Order> {
-		return this.request<Order>(
+		return this.requestAndRefresh<Order>(
 			"/order/create",
 			{
 				method: "POST",
@@ -95,7 +101,7 @@ export class Data {
 	}
 
 	updateCustomer(id: number, customer: UpdateCustomerDto): Promise<Customer> {
-		return this.request<Customer>(
+		return this.requestAndRefresh<Customer>(
 			`/customer/update/${id}`,
 			{
 				method: "PATCH",
@@ -106,7 +112,7 @@ export class Data {
 	}
 
 	updateOrder(id: number, order: UpdateOrderDto): Promise<Order> {
-		return this.request<Order>(
+		return this.requestAndRefresh<Order>(
 			`/order/update/${id}`,
 			{
 				method: "PATCH",
@@ -117,7 +123,7 @@ export class Data {
 	}
 
 	deleteCustomer(id: number): Promise<unknown> {
-		return this.request<unknown>(
+		return this.requestAndRefresh<unknown>(
 			`/customer/delete/${id}`,
 			{
 				method: "DELETE",
@@ -127,7 +133,7 @@ export class Data {
 	}
 
 	deleteOrder(id: number): Promise<unknown> {
-		return this.request<unknown>(
+		return this.requestAndRefresh<unknown>(
 			`/order/delete/${id}`,
 			{
 				method: "DELETE",

@@ -11,10 +11,8 @@
 					<div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 						<div>
 							<p class="text-sm font-medium uppercase tracking-[0.24em] text-cyan-200/80">Customers</p>
-							<h1 class="mt-2 text-3xl font-black tracking-tight text-white">Customer directory</h1>
-							<p class="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-								Browse everyone in your workspace, inspect their order history, and open a customer profile to update contact details.
-							</p>
+							<h1 class="mt-2 text-2xl font-bold tracking-tight text-white">Customer directory</h1>
+							<p class="mt-2 text-sm text-slate-300">Manage your customer records.</p>
 						</div>
 
 						<div class="grid gap-3 sm:grid-cols-2">
@@ -28,9 +26,132 @@
 							</div>
 						</div>
 					</div>
+
+					<div class="mt-6 flex justify-end">
+						<div class="flex flex-wrap gap-3">
+							<button
+								type="button"
+								(click)="goToDashboard()"
+								class="rounded-2xl border border-white/10 bg-white/8 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
+							>
+								Dashboard
+							</button>
+							<button
+								type="button"
+								(click)="toggleCreateCard()"
+								class="rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
+							>
+								@if (showCreateCard()) {
+									Hide create form
+								} @else {
+									Create customer
+								}
+							</button>
+						</div>
+					</div>
 				</div>
 
-				@if (customers().length === 0) {
+				@if (showCreateCard()) {
+					<div class="mx-auto w-full max-w-3xl rounded-[1.75rem] border border-white/10 bg-slate-950/40 p-6 shadow-xl shadow-slate-950/25">
+						<div class="flex flex-col gap-2">
+							<p class="text-sm font-medium uppercase tracking-[0.24em] text-cyan-200/80">Create customer</p>
+							<h2 class="text-2xl font-bold text-white">Add a new customer record</h2>
+							<p class="text-sm leading-6 text-slate-300">
+								Fill in the customer details below and create the profile in one step.
+							</p>
+						</div>
+
+						<form [formRoot]="createCustomerForm" class="mt-8 grid gap-6">
+							<div class="grid gap-6 md:grid-cols-2">
+								<div>
+									<label for="create-customer-name" class="block text-sm font-medium text-slate-100">Name</label>
+									<div class="mt-2">
+										<input
+											id="create-customer-name"
+											type="text"
+											[formField]="createCustomerForm.name"
+											class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label for="create-customer-email" class="block text-sm font-medium text-slate-100">Email</label>
+									<div class="mt-2">
+										<input
+											id="create-customer-email"
+											type="email"
+											[formField]="createCustomerForm.email"
+											class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+										/>
+									</div>
+								</div>
+							</div>
+
+							<div class="grid gap-6 md:grid-cols-2">
+								<div>
+									<label for="create-customer-phone" class="block text-sm font-medium text-slate-100">Phone</label>
+									<div class="mt-2">
+										<input
+											id="create-customer-phone"
+											type="text"
+											[formField]="createCustomerForm.phone"
+											class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label for="create-customer-address" class="block text-sm font-medium text-slate-100">Address</label>
+									<div class="mt-2">
+										<input
+											id="create-customer-address"
+											type="text"
+											[formField]="createCustomerForm.address"
+											class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+										/>
+									</div>
+								</div>
+							</div>
+
+							<div>
+								<label for="create-customer-notes" class="block text-sm font-medium text-slate-100">Notes</label>
+								<div class="mt-2">
+									<textarea
+										id="create-customer-notes"
+										rows="6"
+										[formField]="createCustomerForm.notes"
+										class="block w-full rounded-3xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+									></textarea>
+								</div>
+							</div>
+
+							<div class="flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:justify-end">
+								<button
+									type="button"
+									(click)="resetCreateForm()"
+									class="rounded-2xl border border-white/10 bg-white/8 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
+								>
+									Reset
+								</button>
+								<button
+									type="submit"
+									[disabled]="createCustomerForm().submitting() || createCustomerForm().invalid()"
+									class="rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
+								>
+									@if (createCustomerForm().submitting()) {
+										Creating...
+									} @else {
+										Create customer
+									}
+								</button>
+							</div>
+						</form>
+					</div>
+				}
+
+				@if (showCreateCard()) {
+				} @else if (customers().length === 0) {
 					<div class="rounded-[1.75rem] border border-dashed border-white/15 bg-slate-950/30 px-6 py-16 text-center">
 						<h2 class="text-xl font-semibold text-white">No customers yet</h2>
 						<p class="mt-3 text-sm leading-6 text-slate-300">
@@ -46,171 +167,213 @@
 				}
 			</div>
 		} @else if (customer(); as selectedCustomer) {
-			<div class="grid gap-6 xl:grid-cols-[0.82fr_1.18fr]">
-				<aside class="rounded-[1.75rem] border border-white/10 bg-slate-950/40 p-6 shadow-xl shadow-slate-950/25">
-					<button
-						type="button"
-						(click)="backToList()"
-						class="inline-flex items-center rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
-					>
-						Back to customers
-					</button>
-
-					<div class="mt-6">
-						<p class="text-sm font-medium uppercase tracking-[0.24em] text-cyan-200/80">Customer profile</p>
-						<h1 class="mt-3 text-3xl font-black tracking-tight text-white">{{ selectedCustomer.name }}</h1>
-						<p class="mt-3 text-sm leading-6 text-slate-300">
-							Review their core account info, update contact details, and jump directly to their repair orders.
-						</p>
-					</div>
-
-					<div class="mt-8 grid gap-4">
-						<div class="rounded-3xl border border-white/10 bg-white/6 p-4">
-							<p class="text-xs uppercase tracking-[0.22em] text-slate-400">Contact</p>
-							<p class="mt-3 text-sm text-white">{{ selectedCustomer.email || "No email saved" }}</p>
-							<p class="mt-1 text-sm text-slate-300">{{ selectedCustomer.phone || "No phone saved" }}</p>
-						</div>
-
-						<div class="grid gap-4 sm:grid-cols-2">
-							<div class="rounded-3xl border border-white/10 bg-white/6 p-4">
-								<p class="text-xs uppercase tracking-[0.22em] text-slate-400">Orders</p>
-								<p class="mt-3 text-3xl font-bold text-white">{{ orderCount() }}</p>
-							</div>
-
-							<div class="rounded-3xl border border-white/10 bg-white/6 p-4">
-								<p class="text-xs uppercase tracking-[0.22em] text-slate-400">Lifetime value</p>
-								<p class="mt-3 text-3xl font-bold text-white">{{ lifetimeValue() | currency }}</p>
-							</div>
-						</div>
-
-						<div class="rounded-3xl border border-white/10 bg-white/6 p-4">
-							<p class="text-xs uppercase tracking-[0.22em] text-slate-400">Created</p>
-							<p class="mt-3 text-sm text-white">{{ selectedCustomer.createdAt | date: "MMMM d, y" }}</p>
-							<p class="mt-1 text-xs text-slate-400">Updated {{ selectedCustomer.updatedAt | date: "MMM d, y, h:mm a" }}</p>
-						</div>
-					</div>
-
-					<div class="mt-8">
-						<button
-							type="button"
-							(click)="viewOrders()"
-							class="w-full rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
-						>
-							View customer orders
-						</button>
-					</div>
-				</aside>
-
-				<div class="rounded-[1.75rem] border border-white/10 bg-slate-950/40 p-6 shadow-xl shadow-slate-950/25">
-					<div class="flex flex-col gap-2">
-						<p class="text-sm font-medium uppercase tracking-[0.24em] text-cyan-200/80">Edit details</p>
-						<h2 class="text-2xl font-bold text-white">Keep this customer record up to date</h2>
-						<p class="text-sm leading-6 text-slate-300">
-							Make changes below and save them back to the server. Empty optional fields will be stored as blank values.
-						</p>
-					</div>
-
-					<form [formRoot]="customerForm" class="mt-8 grid gap-6">
-						<div class="grid gap-6 md:grid-cols-2">
-							<div>
-								<label for="customer-name" class="block text-sm font-medium text-slate-100">Name</label>
-								<div class="mt-2">
-									<input
-										id="customer-name"
-										type="text"
-										[formField]="customerForm.name"
-										class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
-									/>
-								</div>
-								@if (customerForm.name().touched() && customerForm.name().invalid()) {
-									<div class="mt-2 text-sm text-rose-300">
-										@for (error of customerForm.name().errors(); track error) {
-											<p>{{ error.message }}</p>
-										}
-									</div>
-								}
-							</div>
-
-							<div>
-								<label for="customer-email" class="block text-sm font-medium text-slate-100">Email</label>
-								<div class="mt-2">
-									<input
-										id="customer-email"
-										type="email"
-										[formField]="customerForm.email"
-										class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
-									/>
-								</div>
-								@if (customerForm.email().touched() && customerForm.email().invalid()) {
-									<div class="mt-2 text-sm text-rose-300">
-										@for (error of customerForm.email().errors(); track error) {
-											<p>{{ error.message }}</p>
-										}
-									</div>
-								}
-							</div>
-						</div>
-
-						<div class="grid gap-6 md:grid-cols-2">
-							<div>
-								<label for="customer-phone" class="block text-sm font-medium text-slate-100">Phone</label>
-								<div class="mt-2">
-									<input
-										id="customer-phone"
-										type="text"
-										[formField]="customerForm.phone"
-										class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
-									/>
-								</div>
-							</div>
-
-							<div>
-								<label for="customer-address" class="block text-sm font-medium text-slate-100">Address</label>
-								<div class="mt-2">
-									<input
-										id="customer-address"
-										type="text"
-										[formField]="customerForm.address"
-										class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
-									/>
-								</div>
-							</div>
-						</div>
-
-						<div>
-							<label for="customer-notes" class="block text-sm font-medium text-slate-100">Notes</label>
-							<div class="mt-2">
-								<textarea
-									id="customer-notes"
-									rows="7"
-									[formField]="customerForm.notes"
-									class="block w-full rounded-3xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
-								></textarea>
-							</div>
-						</div>
-
-						<div class="flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:justify-end">
+			<div class="mx-auto max-w-3xl">
+				@if (showEditCard()) {
+					<div class="rounded-[1.75rem] border border-white/10 bg-slate-950/40 p-6 shadow-xl shadow-slate-950/25 xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto">
+						<div class="flex flex-col gap-2">
 							<button
 								type="button"
-								(click)="resetForm()"
-								class="rounded-2xl border border-white/10 bg-white/8 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
+								(click)="toggleEditCard()"
+								class="inline-flex w-fit items-center rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
 							>
-								Reset
+								Back to profile
 							</button>
-							<button
-								type="submit"
-								[disabled]="customerForm().submitting() || customerForm().invalid()"
-								class="rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
-							>
-								@if (customerForm().submitting()) {
-									Saving...
-								} @else {
-									Save changes
-								}
-							</button>
+							<p class="text-sm font-medium uppercase tracking-[0.24em] text-cyan-200/80">Edit details</p>
+							<h2 class="text-2xl font-bold text-white">Keep this customer record up to date</h2>
+							<p class="text-sm leading-6 text-slate-300">
+								Make changes below and save them back to the server. Empty optional fields will be stored as blank values.
+							</p>
 						</div>
-					</form>
-				</div>
+
+						<form [formRoot]="customerForm" class="mt-8 grid gap-6">
+							<div class="grid gap-6 md:grid-cols-2">
+								<div>
+									<label for="customer-name" class="block text-sm font-medium text-slate-100">Name</label>
+									<div class="mt-2">
+										<input
+											id="customer-name"
+											type="text"
+											[formField]="customerForm.name"
+											class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+										/>
+									</div>
+									@if (customerForm.name().touched() && customerForm.name().invalid()) {
+										<div class="mt-2 text-sm text-rose-300">
+											@for (error of customerForm.name().errors(); track error) {
+												<p>{{ error.message }}</p>
+											}
+										</div>
+									}
+								</div>
+
+								<div>
+									<label for="customer-email" class="block text-sm font-medium text-slate-100">Email</label>
+									<div class="mt-2">
+										<input
+											id="customer-email"
+											type="email"
+											[formField]="customerForm.email"
+											class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+										/>
+									</div>
+									@if (customerForm.email().touched() && customerForm.email().invalid()) {
+										<div class="mt-2 text-sm text-rose-300">
+											@for (error of customerForm.email().errors(); track error) {
+												<p>{{ error.message }}</p>
+											}
+										</div>
+									}
+								</div>
+							</div>
+
+							<div class="grid gap-6 md:grid-cols-2">
+								<div>
+									<label for="customer-phone" class="block text-sm font-medium text-slate-100">Phone</label>
+									<div class="mt-2">
+										<input
+											id="customer-phone"
+											type="text"
+											[formField]="customerForm.phone"
+											class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+										/>
+									</div>
+								</div>
+
+								<div>
+									<label for="customer-address" class="block text-sm font-medium text-slate-100">Address</label>
+									<div class="mt-2">
+										<input
+											id="customer-address"
+											type="text"
+											[formField]="customerForm.address"
+											class="block w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+										/>
+									</div>
+								</div>
+							</div>
+
+							<div>
+								<label for="customer-notes" class="block text-sm font-medium text-slate-100">Notes</label>
+								<div class="mt-2">
+									<textarea
+										id="customer-notes"
+										rows="7"
+										[formField]="customerForm.notes"
+										class="block w-full rounded-3xl border border-white/10 bg-white/6 px-4 py-3 text-base text-white outline-none placeholder:text-slate-500 focus:border-cyan-300"
+									></textarea>
+								</div>
+							</div>
+
+							<div class="flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:justify-end">
+								<button
+									type="button"
+									(click)="deleteCustomer()"
+									class="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-5 py-3 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-rose-300"
+								>
+									Delete customer
+								</button>
+								<button
+									type="button"
+									(click)="resetForm()"
+									class="rounded-2xl border border-white/10 bg-white/8 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
+								>
+									Reset
+								</button>
+								<button
+									type="submit"
+									[disabled]="customerForm().submitting() || customerForm().invalid()"
+									class="rounded-2xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
+								>
+									@if (customerForm().submitting()) {
+										Saving...
+									} @else {
+										Save changes
+									}
+								</button>
+							</div>
+						</form>
+					</div>
+				} @else {
+					<aside class="rounded-[1.75rem] border border-white/10 bg-slate-950/40 p-6 shadow-xl shadow-slate-950/25 xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto">
+						<button
+							type="button"
+							(click)="backToList()"
+							class="inline-flex items-center rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
+						>
+							Back to customers
+						</button>
+
+						<button
+							type="button"
+							(click)="goToDashboard()"
+							class="ml-3 inline-flex items-center rounded-full border border-white/10 bg-white/8 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
+						>
+							Dashboard
+						</button>
+
+						<div class="mt-6">
+							<p class="text-sm font-medium uppercase tracking-[0.24em] text-cyan-200/80">Customer profile</p>
+							<h1 class="mt-3 text-3xl font-black tracking-tight text-white">{{ selectedCustomer.name }}</h1>
+							<p class="mt-3 text-sm leading-6 text-slate-300">
+								Review their core account info, update contact details, and jump directly to their repair orders.
+							</p>
+						</div>
+
+						<div class="mt-8 grid gap-4">
+							<div class="rounded-3xl border border-white/10 bg-white/6 p-4">
+								<p class="text-xs uppercase tracking-[0.22em] text-slate-400">Contact</p>
+								<p class="mt-3 text-sm text-white">{{ selectedCustomer.email || "No email saved" }}</p>
+								<p class="mt-1 text-sm text-slate-300">{{ selectedCustomer.phone || "No phone saved" }}</p>
+							</div>
+
+							<div class="grid gap-4 sm:grid-cols-2">
+								<div class="rounded-3xl border border-white/10 bg-white/6 p-4">
+									<p class="text-xs uppercase tracking-[0.22em] text-slate-400">Orders</p>
+									<p class="mt-3 text-3xl font-bold text-white">{{ orderCount() }}</p>
+								</div>
+
+								<div class="rounded-3xl border border-white/10 bg-white/6 p-4">
+									<p class="text-xs uppercase tracking-[0.22em] text-slate-400">Lifetime value</p>
+									<p class="mt-3 text-3xl font-bold text-white">{{ lifetimeValue() | currency }}</p>
+								</div>
+							</div>
+
+							<div class="rounded-3xl border border-white/10 bg-white/6 p-4">
+								<p class="text-xs uppercase tracking-[0.22em] text-slate-400">Created</p>
+								<p class="mt-3 text-sm text-white">{{ selectedCustomer.createdAt | date: "MMMM d, y" }}</p>
+								<p class="mt-1 text-xs text-slate-400">Updated {{ selectedCustomer.updatedAt | date: "MMM d, y, h:mm a" }}</p>
+							</div>
+						</div>
+
+						<div class="mt-8">
+							<button
+								type="button"
+								(click)="viewOrders()"
+								class="w-full rounded-2xl bg-cyan-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
+							>
+								View customer orders
+							</button>
+
+							<div class="mt-3 grid gap-3 sm:grid-cols-2">
+								<button
+									type="button"
+									(click)="toggleEditCard()"
+									class="w-full rounded-2xl border border-white/10 bg-white/8 px-4 py-3 text-sm font-semibold text-slate-100 transition hover:bg-white/12 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300"
+								>
+									Edit details
+								</button>
+
+								<button
+									type="button"
+									(click)="deleteCustomer()"
+									class="w-full rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-rose-300"
+								>
+									Delete customer
+								</button>
+							</div>
+						</div>
+					</aside>
+				}
 			</div>
 		} @else {
 			<div class="rounded-[1.75rem] border border-dashed border-white/15 bg-slate-950/30 px-6 py-16 text-center">

@@ -5,6 +5,7 @@ import { Router } from "@angular/router";
 import { ToastrService } from "ngx-toastr";
 import { AgTable } from "../ag-table/ag-table";
 import type {
+	CreateOrderDto,
 	Order,
 	OrderStatus,
 	PaymentMethod,
@@ -71,6 +72,8 @@ export class OrderComponent {
 	readonly totalOrderValue = computed(() =>
 		this.filteredOrders().reduce((sum, order) => sum + (order.finalTotal ?? order.estimate ?? 0), 0),
 	);
+	readonly showEditCard = signal(false);
+	readonly showCreateCard = signal(false);
 	readonly hasRequestedInitialLoad = signal(false);
 
 	readonly statusOptions = Object.values(OrderStatusEnum);
@@ -80,6 +83,7 @@ export class OrderComponent {
 	readonly customerOptions = computed(() => this.customers().map((customer) => ({ id: customer.id, name: customer.name })));
 
 	readonly formModel = signal<OrderFormModel>(createEmptyOrderFormModel());
+	readonly createFormModel = signal<OrderFormModel>(createEmptyOrderFormModel());
 	readonly orderForm = form(
 		this.formModel,
 		(path) => {
@@ -98,12 +102,36 @@ export class OrderComponent {
 
 					try {
 						await this.dataService.updateOrder(currentOrder.id, this.buildPayload());
-						await this.dataService.loadAppData();
 						this.syncForm(this.order());
 						this.toastr.success("Order details saved.", "Order updated");
 					} catch (error) {
 						const message = error instanceof Error ? error.message : "Failed to update order";
 						this.toastr.error(message, "Update failed");
+					}
+
+					return null;
+				},
+			},
+		},
+	);
+	readonly createOrderForm = form(
+		this.createFormModel,
+		(path) => {
+			required(path.customerId, { message: "Customer is required" });
+			required(path.problem, { message: "Problem is required" });
+		},
+		{
+			submission: {
+				action: async () => {
+					try {
+						const createdOrder = await this.dataService.createOrder(this.buildCreatePayload());
+						this.resetCreateForm();
+						this.showCreateCard.set(false);
+						this.toastr.success("Order created successfully.", "Order created");
+						void this.router.navigate(["/order", createdOrder.id]);
+					} catch (error) {
+						const message = error instanceof Error ? error.message : "Failed to create order";
+						this.toastr.error(message, "Create failed");
 					}
 
 					return null;
@@ -122,11 +150,16 @@ export class OrderComponent {
 
 		effect(() => {
 			this.syncForm(this.order());
+			this.showEditCard.set(false);
 		});
 	}
 
 	openOrder(order: Order): void {
 		void this.router.navigate(["/order", order.id]);
+	}
+
+	goToDashboard(): void {
+		void this.router.navigate(["/dashboard"]);
 	}
 
 	backToList(): void {
@@ -140,6 +173,39 @@ export class OrderComponent {
 
 	resetForm(): void {
 		this.syncForm(this.order());
+	}
+
+	toggleEditCard(): void {
+		this.showEditCard.update((value) => !value);
+	}
+
+	toggleCreateCard(): void {
+		this.showCreateCard.update((value) => !value);
+	}
+
+	resetCreateForm(): void {
+		this.createFormModel.set(createEmptyOrderFormModel());
+	}
+
+	async deleteOrder(): Promise<void> {
+		const currentOrder = this.order();
+		if (!currentOrder) {
+			return;
+		}
+
+		const confirmed = globalThis.confirm(`Delete order #${currentOrder.id}? This action cannot be undone.`);
+		if (!confirmed) {
+			return;
+		}
+
+		try {
+			await this.dataService.deleteOrder(currentOrder.id);
+			this.toastr.success("Order deleted successfully.", "Order deleted");
+			void this.router.navigate(["/order"]);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : "Failed to delete order";
+			this.toastr.error(message, "Delete failed");
+		}
 	}
 
 	private syncForm(order: Order | null): void {
@@ -169,6 +235,28 @@ export class OrderComponent {
 
 	private buildPayload(): UpdateOrderDto {
 		const model = this.formModel();
+
+		return {
+			customerId: Number(model.customerId),
+			status: model.status,
+			problem: model.problem.trim(),
+			deviceType: normalizeOptionalString(model.deviceType),
+			deviceBrand: normalizeOptionalString(model.deviceBrand),
+			deviceModel: normalizeOptionalString(model.deviceModel),
+			serialNumber: normalizeOptionalString(model.serialNumber),
+			intakeNotes: normalizeOptionalString(model.intakeNotes),
+			technicianNotes: normalizeOptionalString(model.technicianNotes),
+			estimate: normalizeOptionalNumber(model.estimate),
+			finalTotal: normalizeOptionalNumber(model.finalTotal),
+			invoiceStatus: model.invoiceStatus,
+			paymentMethod: model.paymentMethod === "" ? null : model.paymentMethod,
+			invoiceDueAt: normalizeOptionalDate(model.invoiceDueAt),
+			invoicePaidAt: normalizeOptionalDate(model.invoicePaidAt),
+		};
+	}
+
+	private buildCreatePayload(): CreateOrderDto {
+		const model = this.createFormModel();
 
 		return {
 			customerId: Number(model.customerId),
@@ -226,7 +314,12 @@ function normalizeOptionalNumber(value: string): number | null {
 }
 
 function normalizeOptionalDate(value: string): string | null {
-	return value.trim().length > 0 ? value : null;
+	const trimmed = value.trim();
+	if (trimmed.length === 0) {
+		return null;
+	}
+
+	return `${trimmed}T00:00:00.000Z`;
 }
 
 function toDateInputValue(value: string | null): string {

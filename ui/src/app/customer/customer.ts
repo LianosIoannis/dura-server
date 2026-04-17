@@ -5,7 +5,7 @@ import { Router } from "@angular/router";
 import type { ColDef } from "ag-grid-community";
 import { ToastrService } from "ngx-toastr";
 import { AgTable } from "../ag-table/ag-table";
-import type { Customer, UpdateCustomerDto } from "../models/models";
+import type { CreateCustomerDto, Customer, UpdateCustomerDto } from "../models/models";
 import { Data } from "../services/data";
 
 type CustomerFormModel = {
@@ -37,6 +37,8 @@ export class CustomerComponent {
 	readonly isListView = computed(() => this.id() === null);
 	readonly customer = computed(() => this.customers().find((customer) => customer.id === this.id()) ?? null);
 	readonly totalLinkedOrders = computed(() => this.orders().length);
+	readonly showEditCard = signal(false);
+	readonly showCreateCard = signal(false);
 	private readonly hasRequestedInitialLoad = signal(false);
 
 	readonly customerColDefs: ColDef<Customer>[] = [
@@ -81,6 +83,14 @@ export class CustomerComponent {
 		notes: "",
 	});
 
+	readonly createFormModel = signal<CustomerFormModel>({
+		name: "",
+		email: "",
+		phone: "",
+		address: "",
+		notes: "",
+	});
+
 	readonly customerForm = form(
 		this.formModel,
 		(path) => {
@@ -99,12 +109,36 @@ export class CustomerComponent {
 
 					try {
 						await this.dataService.updateCustomer(currentCustomer.id, this.buildPayload());
-						await this.dataService.loadAppData();
 						this.syncForm(this.customer());
 						this.toastr.success("Customer details saved.", "Customer updated");
 					} catch (error) {
 						const message = error instanceof Error ? error.message : "Failed to update customer";
 						this.toastr.error(message, "Update failed");
+					}
+
+					return null;
+				},
+			},
+		},
+	);
+	readonly createCustomerForm = form(
+		this.createFormModel,
+		(path) => {
+			required(path.name, { message: "Name is required" });
+			email(path.email, { message: "Enter a valid email address" });
+		},
+		{
+			submission: {
+				action: async () => {
+					try {
+						const createdCustomer = await this.dataService.createCustomer(this.buildCreatePayload());
+						this.resetCreateForm();
+						this.showCreateCard.set(false);
+						this.toastr.success("Customer created successfully.", "Customer created");
+						void this.router.navigate(["/customer", createdCustomer.id]);
+					} catch (error) {
+						const message = error instanceof Error ? error.message : "Failed to create customer";
+						this.toastr.error(message, "Create failed");
 					}
 
 					return null;
@@ -132,11 +166,16 @@ export class CustomerComponent {
 		effect(() => {
 			const currentCustomer = this.customer();
 			this.syncForm(currentCustomer);
+			this.showEditCard.set(false);
 		});
 	}
 
 	openCustomer(customer: Customer): void {
 		void this.router.navigate(["/customer", customer.id]);
+	}
+
+	goToDashboard(): void {
+		void this.router.navigate(["/dashboard"]);
 	}
 
 	backToList(): void {
@@ -145,6 +184,39 @@ export class CustomerComponent {
 
 	resetForm(): void {
 		this.syncForm(this.customer());
+	}
+
+	toggleEditCard(): void {
+		this.showEditCard.update((value) => !value);
+	}
+
+	toggleCreateCard(): void {
+		this.showCreateCard.update((value) => !value);
+	}
+
+	resetCreateForm(): void {
+		this.createFormModel.set(createEmptyCustomerFormModel());
+	}
+
+	async deleteCustomer(): Promise<void> {
+		const currentCustomer = this.customer();
+		if (!currentCustomer) {
+			return;
+		}
+
+		const confirmed = globalThis.confirm(`Delete customer "${currentCustomer.name}"? This action cannot be undone.`);
+		if (!confirmed) {
+			return;
+		}
+
+		try {
+			await this.dataService.deleteCustomer(currentCustomer.id);
+			this.toastr.success("Customer deleted successfully.", "Customer deleted");
+			void this.router.navigate(["/customer"]);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : "Failed to delete customer";
+			this.toastr.error(message, "Delete failed");
+		}
 	}
 
 	viewOrders(): void {
@@ -170,13 +242,7 @@ export class CustomerComponent {
 
 	private syncForm(customer: Customer | null): void {
 		if (!customer) {
-			this.formModel.set({
-				name: "",
-				email: "",
-				phone: "",
-				address: "",
-				notes: "",
-			});
+			this.formModel.set(createEmptyCustomerFormModel());
 			return;
 		}
 
@@ -200,9 +266,31 @@ export class CustomerComponent {
 			notes: normalizeOptionalString(model.notes),
 		};
 	}
+
+	private buildCreatePayload(): CreateCustomerDto {
+		const model = this.createFormModel();
+
+		return {
+			name: model.name.trim(),
+			email: normalizeOptionalString(model.email),
+			phone: normalizeOptionalString(model.phone),
+			address: normalizeOptionalString(model.address),
+			notes: normalizeOptionalString(model.notes),
+		};
+	}
 }
 
 function normalizeOptionalString(value: string): string | null {
 	const trimmed = value.trim();
 	return trimmed.length > 0 ? trimmed : null;
+}
+
+function createEmptyCustomerFormModel(): CustomerFormModel {
+	return {
+		name: "",
+		email: "",
+		phone: "",
+		address: "",
+		notes: "",
+	};
 }

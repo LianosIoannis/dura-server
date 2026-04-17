@@ -4,7 +4,7 @@ import {
 	ClientSideRowModelModule,
 	type ColDef,
 	ColumnAutoSizeModule,
-	colorSchemeVariable,
+	colorSchemeDarkBlue,
 	type GridOptions,
 	ModuleRegistry,
 	PaginationModule,
@@ -12,7 +12,7 @@ import {
 	RowSelectionModule,
 	type RowSelectionOptions,
 	TextFilterModule,
-	themeAlpine,
+	themeQuartz,
 } from "ag-grid-community";
 
 ModuleRegistry.registerModules([
@@ -29,7 +29,7 @@ ModuleRegistry.registerModules([
 	templateUrl: "./ag-table.html",
 })
 export class AgTable<T extends object> {
-	themeAlpine = themeAlpine.withPart(colorSchemeVariable);
+	themeQuartzDark = themeQuartz.withPart(colorSchemeDarkBlue);
 
 	rowClicked = output<T>();
 
@@ -61,7 +61,7 @@ export class AgTable<T extends object> {
 	};
 
 	gridOptions: GridOptions = {
-		theme: this.themeAlpine,
+		theme: this.themeQuartzDark,
 		suppressCellFocus: true,
 		pagination: true,
 		paginationPageSize: 10,
