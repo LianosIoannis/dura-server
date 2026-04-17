@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from "@angular/core";
-import type { AgCartesianChartOptions, AgPolarChartOptions } from "ag-charts-community";
 import { RouterLink } from "@angular/router";
-import { OrderStatus } from "../models/models";
+import type { AgCartesianChartOptions, AgPolarChartOptions } from "ag-charts-community";
 import { AgChartComponent } from "../ag-chart/ag-chart";
+import { OrderStatus } from "../models/models";
 import { Data } from "../services/data";
 
 type DashboardStat = {
@@ -108,7 +108,6 @@ export class Dashboard {
 	});
 	readonly statusChartOptions = computed<AgPolarChartOptions>(() => ({
 		height: 320,
-		baseTheme: "ag-default-dark",
 		background: {
 			fill: "transparent",
 		},
@@ -117,10 +116,6 @@ export class Dashboard {
 			noData: {
 				text: "No order data yet",
 			},
-		},
-		palette: {
-			fills: ["#22d3ee", "#f59e0b", "#ec4899", "#10b981"],
-			strokes: ["#22d3ee", "#f59e0b", "#ec4899", "#10b981"],
 		},
 		series: [
 			{
@@ -146,6 +141,10 @@ export class Dashboard {
 		},
 		theme: {
 			baseTheme: "ag-default-dark",
+			palette: {
+				fills: ["#22d3ee", "#f59e0b", "#ec4899", "#10b981"],
+				strokes: ["#22d3ee", "#f59e0b", "#ec4899", "#10b981"],
+			},
 			params: {
 				backgroundColor: "transparent",
 				foregroundColor: "#e2e8f0",
@@ -155,7 +154,6 @@ export class Dashboard {
 	}));
 	readonly monthlyActivityChartOptions = computed<AgCartesianChartOptions>(() => ({
 		height: 320,
-		baseTheme: "ag-default-dark",
 		background: {
 			fill: "transparent",
 		},
@@ -164,10 +162,6 @@ export class Dashboard {
 			noData: {
 				text: "No activity data yet",
 			},
-		},
-		palette: {
-			fills: ["#22c55e", "#38bdf8"],
-			strokes: ["#22c55e", "#38bdf8"],
 		},
 		series: [
 			{
@@ -229,6 +223,10 @@ export class Dashboard {
 		},
 		theme: {
 			baseTheme: "ag-default-dark",
+			palette: {
+				fills: ["#22c55e", "#38bdf8"],
+				strokes: ["#22c55e", "#38bdf8"],
+			},
 			params: {
 				backgroundColor: "transparent",
 				foregroundColor: "#e2e8f0",
