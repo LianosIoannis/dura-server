@@ -8,17 +8,20 @@ export const orderColDefs: ColDef[] = [
 		width: 80,
 		flex: 0,
 		filter: false,
+		minWidth: 80,
 	},
 	{
 		headerName: "Customer",
 		field: "customer.name",
 		flex: 1,
 		filter: true,
+		minWidth: 120,
 	},
 	{
 		headerName: "Device",
 		flex: 1,
 		filter: true,
+		minWidth: 120,
 		valueGetter: (p) => [p.data?.deviceBrand, p.data?.deviceModel].filter(Boolean).join(" ") || "—",
 	},
 	{
@@ -26,12 +29,14 @@ export const orderColDefs: ColDef[] = [
 		field: "problem",
 		flex: 2,
 		filter: true,
+		minWidth: 200,
 	},
 	{
 		headerName: "Status",
 		flex: 1,
 		filter: true,
 		valueGetter: (p) => formatLabel(p.data?.status ?? ""),
+		minWidth: 120,
 	},
 	{
 		headerName: "Total",
@@ -39,6 +44,7 @@ export const orderColDefs: ColDef[] = [
 		filter: false,
 		valueGetter: (p) => p.data?.finalTotal ?? p.data?.estimate,
 		valueFormatter: (p) => (p.value != null ? `$${(p.value as number).toFixed(2)}` : "—"),
+		minWidth: 100,
 	},
 	{
 		headerName: "Date",
@@ -47,6 +53,7 @@ export const orderColDefs: ColDef[] = [
 		filter: false,
 		sort: "desc",
 		valueFormatter: (p) => dayjs(p.value as string).format("MMM D, YYYY"),
+		minWidth: 120,
 	},
 ];
 

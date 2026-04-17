@@ -47,24 +47,28 @@ export class CustomerComponent {
 			field: "name",
 			flex: 1.4,
 			filter: true,
+			minWidth: 150,
 		},
 		{
 			headerName: "Email",
 			flex: 1.4,
 			valueGetter: ({ data }) => data?.email ?? "—",
 			filter: true,
+			minWidth: 150,
 		},
 		{
 			headerName: "Phone",
 			flex: 1,
 			valueGetter: ({ data }) => data?.phone ?? "—",
 			filter: true,
+			minWidth: 120,
 		},
 		{
 			headerName: "Orders",
 			flex: 0.7,
 			valueGetter: ({ data }) => (data ? this.getOrderCount(data) : 0),
 			filter: false,
+			minWidth: 100,
 		},
 		{
 			headerName: "Created",
@@ -76,6 +80,7 @@ export class CustomerComponent {
 						)
 					: "—",
 			filter: false,
+			minWidth: 120,
 		},
 	];
 
