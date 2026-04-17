@@ -39,17 +39,13 @@ export class Dashboard {
 
 	readonly totalCustomers = computed(() => this.customers().length);
 	readonly totalOrders = computed(() => this.orders().length);
-	readonly ordersInRepair = computed(() =>
-		this.orders().filter((order) => order.status === OrderStatus.IN_REPAIR).length,
+	readonly ordersInRepair = computed(
+		() => this.orders().filter((order) => order.status === OrderStatus.IN_REPAIR).length,
 	);
-	readonly readyOrders = computed(() =>
-		this.orders().filter((order) => order.status === OrderStatus.READY).length,
-	);
-	readonly pendingOrders = computed(() =>
-		this.orders().filter((order) => order.status === OrderStatus.PENDING).length,
-	);
-	readonly completedOrders = computed(() =>
-		this.orders().filter((order) => order.status === OrderStatus.COMPLETED).length,
+	readonly readyOrders = computed(() => this.orders().filter((order) => order.status === OrderStatus.READY).length);
+	readonly pendingOrders = computed(() => this.orders().filter((order) => order.status === OrderStatus.PENDING).length);
+	readonly completedOrders = computed(
+		() => this.orders().filter((order) => order.status === OrderStatus.COMPLETED).length,
 	);
 	readonly statCards = computed<DashboardStat[]>(() => [
 		{
@@ -81,12 +77,14 @@ export class Dashboard {
 			accentClass: "from-fuchsia-500/25 via-pink-400/10 to-transparent",
 		},
 	]);
-	readonly statusChartData = computed<StatusChartDatum[]>(() => [
-		{ label: "Pending", value: this.pendingOrders() },
-		{ label: "In repair", value: this.ordersInRepair() },
-		{ label: "Ready", value: this.readyOrders() },
-		{ label: "Completed", value: this.completedOrders() },
-	].filter((item) => item.value > 0));
+	readonly statusChartData = computed<StatusChartDatum[]>(() =>
+		[
+			{ label: "Pending", value: this.pendingOrders() },
+			{ label: "In repair", value: this.ordersInRepair() },
+			{ label: "Ready", value: this.readyOrders() },
+			{ label: "Completed", value: this.completedOrders() },
+		].filter((item) => item.value > 0),
+	);
 	readonly monthlyActivityData = computed<ActivityChartDatum[]>(() => {
 		const months = getRecentMonthBuckets(6);
 

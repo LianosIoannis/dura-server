@@ -12,7 +12,11 @@ import type {
 	UpdateOrderDto,
 	InvoiceStatus,
 } from "../models/models";
-import { InvoiceStatus as InvoiceStatusEnum, OrderStatus as OrderStatusEnum, PaymentMethod as PaymentMethodEnum } from "../models/models";
+import {
+	InvoiceStatus as InvoiceStatusEnum,
+	OrderStatus as OrderStatusEnum,
+	PaymentMethod as PaymentMethodEnum,
+} from "../models/models";
 import { orderColDefs } from "./orderColDef.model";
 import { Data } from "../services/data";
 
@@ -67,7 +71,9 @@ export class OrderComponent {
 	});
 	readonly order = computed(() => this.orders().find((order) => order.id === this.id()) ?? null);
 	readonly selectedCustomer = computed(() =>
-		this.customerId() === null ? null : this.customers().find((customer) => customer.id === this.customerId()) ?? null,
+		this.customerId() === null
+			? null
+			: (this.customers().find((customer) => customer.id === this.customerId()) ?? null),
 	);
 	readonly totalOrderValue = computed(() =>
 		this.filteredOrders().reduce((sum, order) => sum + (order.finalTotal ?? order.estimate ?? 0), 0),
@@ -80,7 +86,9 @@ export class OrderComponent {
 	readonly invoiceStatusOptions = Object.values(InvoiceStatusEnum);
 	readonly paymentMethodOptions = Object.values(PaymentMethodEnum);
 	readonly orderColDefs = orderColDefs;
-	readonly customerOptions = computed(() => this.customers().map((customer) => ({ id: customer.id, name: customer.name })));
+	readonly customerOptions = computed(() =>
+		this.customers().map((customer) => ({ id: customer.id, name: customer.name })),
+	);
 
 	readonly formModel = signal<OrderFormModel>(createEmptyOrderFormModel());
 	readonly createFormModel = signal<OrderFormModel>(createEmptyOrderFormModel());

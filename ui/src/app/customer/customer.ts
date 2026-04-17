@@ -70,7 +70,11 @@ export class CustomerComponent {
 			headerName: "Created",
 			flex: 1,
 			valueGetter: ({ data }) =>
-				data?.createdAt ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(new Date(data.createdAt)) : "—",
+				data?.createdAt
+					? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(
+							new Date(data.createdAt),
+						)
+					: "—",
 			filter: false,
 		},
 	];
