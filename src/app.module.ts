@@ -13,7 +13,7 @@ import { UserModule } from "./user/user.module";
 			envFilePath: ".env",
 		}),
 		ServeStaticModule.forRoot({
-			rootPath: join(__dirname, "..", "ui"),
+			rootPath: join(__dirname, "..", "ui", "dist", "ui", "browser"),
 		}),
 		UserModule,
 		CustomerModule,

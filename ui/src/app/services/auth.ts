@@ -5,7 +5,7 @@ import type { LoginPayload, SignupPayload } from "../models/models";
 	providedIn: "root",
 })
 export class Auth {
-	private readonly baseUrl = "http://localhost:3000";
+	private readonly baseUrl = "";
 	private readonly TOKEN_KEY = "token";
 
 	token = signal<string | null>(sessionStorage.getItem(this.TOKEN_KEY));

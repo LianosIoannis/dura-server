@@ -15,7 +15,7 @@ import { Auth } from "./auth";
 	providedIn: "root",
 })
 export class Data {
-	private readonly baseUrl = "http://localhost:3000";
+	private readonly baseUrl = "";
 
 	authService = inject(Auth);
 	router = inject(Router);
@@ -139,6 +139,16 @@ export class Data {
 				method: "DELETE",
 			},
 			"Failed to delete order",
+		);
+	}
+
+	printOrder(id: number): Promise<unknown> {
+		return this.request<unknown>(
+			`/order/print-html/${id}`,
+			{
+				method: "GET",
+			},
+			"Failed to print order",
 		);
 	}
 }

@@ -6,8 +6,7 @@ import { PrismaClient } from "./generated/prisma/client";
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: <nest>
-	constructor(private readonly config: ConfigService) {
+	constructor(config: ConfigService) {
 		const url = config.getOrThrow<string>("DATABASE_URL");
 
 		const adapter = new PrismaBetterSqlite3({ url });

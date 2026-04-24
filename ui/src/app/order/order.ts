@@ -170,6 +170,22 @@ export class OrderComponent {
 		void this.router.navigate(["/dashboard"]);
 	}
 
+	async printSelectedOrder(): Promise<void> {
+		const currentOrder = this.order();
+		if (!currentOrder) {
+			this.toastr.error("Order not found.", "Print failed");
+			return;
+		}
+
+		try {
+			await this.dataService.printOrder(currentOrder.id);
+			this.toastr.success("Print request sent.", "Order print");
+		} catch (error) {
+			const message = error instanceof Error ? error.message : "Failed to print order";
+			this.toastr.error(message, "Print failed");
+		}
+	}
+
 	backToList(): void {
 		const customerId = this.customerId();
 		void this.router.navigate(customerId === null ? ["/order"] : ["/order/for-customer", customerId]);
