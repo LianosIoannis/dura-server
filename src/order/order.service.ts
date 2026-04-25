@@ -160,8 +160,7 @@ export class OrderService {
 		printer.resetLineSpacing();
 		printer.newLine();
 		printer.alignCenter();
-		printer.println("Powered By: Service Me");
-		printer.println("https://serviceme.gr/");
+		printer.println("Powered By: Dura Repairs");
 		printer.cut();
 		await printer.execute();
 

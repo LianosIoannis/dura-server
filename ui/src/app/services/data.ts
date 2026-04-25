@@ -144,7 +144,7 @@ export class Data {
 
 	printOrder(id: number): Promise<unknown> {
 		return this.request<unknown>(
-			`/order/print-html/${id}`,
+			`/order/print/${id}`,
 			{
 				method: "GET",
 			},
