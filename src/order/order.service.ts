@@ -1,8 +1,10 @@
 /** biome-ignore-all lint/style/useImportType: <nest> */
-import { readFile } from "node:fs/promises";
+import fs, { readFile } from "node:fs/promises";
+import path from "node:path";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { BreakLine, CharacterSet, PrinterTypes, ThermalPrinter } from "node-thermal-printer";
+import puppeteer from "puppeteer";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
@@ -167,6 +169,35 @@ export class OrderService {
 		return order;
 	}
 
+	async printOrderNew(id: number) {
+		const imagePath = await this.renderOrderReceiptImage(id);
+
+		const printerIp = this.config.getOrThrow<string>("PRINTER_IP");
+		const printerPort = this.config.getOrThrow<number>("PRINTER_PORT");
+		const printerType = PrinterTypes[this.config.getOrThrow<string>("PRINTER_TYPE") as keyof typeof PrinterTypes];
+
+		const printer = new ThermalPrinter({
+			type: printerType,
+			interface: `tcp://${printerIp}:${printerPort}`,
+			width: 42,
+			breakLine: BreakLine.WORD,
+			removeSpecialCharacters: false,
+			lineCharacter: "-",
+		});
+
+		const isConnected = await printer.isPrinterConnected();
+
+		if (!isConnected) {
+			throw new Error("Unable to connect to the printer");
+		}
+
+		printer.alignCenter();
+		await printer.printImage(imagePath);
+		printer.cut();
+
+		await printer.execute();
+	}
+
 	async printOrderHtml(id: number) {
 		const order = await this.findOrderForReceipt(id);
 		const receiptContent = this.buildReceiptContent(order);
@@ -190,18 +221,17 @@ export class OrderService {
 
 					body {
 						margin: 0;
-						padding: 24px;
-						background: #e7e1d6;
+						padding: 0;
+						background: white;
 						color: #111;
 					}
 
 					.receipt {
-						width: 58mm;
-						max-width: 100%;
-						margin: 0 auto;
+						width: 384px;
+						margin: 0;
 						padding: 16px 14px 24px;
-						background: #fffefb;
-						box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+						background: white;
+						box-shadow: none;
 					}
 
 					.center {
@@ -314,12 +344,55 @@ export class OrderService {
 						${receiptContent.footerLines.map((line) => `<div class="footer-line">${escapeHtml(line)}</div>`).join("")}
 					</section>
 					<section class="powered">
-						<div class="powered-line">Powered By: Service Me</div>
-						<div class="powered-line">https://serviceme.gr/</div>
+						<div class="powered-line">Powered By: Dura Repairs</div>
+						<div class="powered-line">https://www.durarepairs.gr/</div>
 					</section>
 				</article>
 			</body>
 			</html>`;
+	}
+
+	async renderOrderReceiptImage(id: number): Promise<string> {
+		const html = await this.printOrderHtml(id);
+
+		const outputDir = path.resolve(process.cwd(), "tmp", "receipts");
+		await fs.mkdir(outputDir, { recursive: true });
+
+		const outputPath = path.join(outputDir, `receipt-${id}.png`);
+
+		const browser = await puppeteer.launch({
+			headless: true,
+			args: ["--no-sandbox", "--disable-setuid-sandbox"],
+		});
+
+		try {
+			const page = await browser.newPage();
+
+			await page.setViewport({
+				width: 384,
+				height: 2000,
+				deviceScaleFactor: 2,
+			});
+
+			await page.setContent(html, {
+				waitUntil: "networkidle0",
+			});
+
+			const receiptElement = await page.$(".receipt");
+
+			if (!receiptElement) {
+				throw new Error("Receipt element not found");
+			}
+
+			await receiptElement.screenshot({
+				path: outputPath,
+				omitBackground: false,
+			});
+
+			return outputPath;
+		} finally {
+			await browser.close();
+		}
 	}
 
 	async getAll() {

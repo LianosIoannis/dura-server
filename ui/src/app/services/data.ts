@@ -142,13 +142,29 @@ export class Data {
 		);
 	}
 
-	printOrder(id: number): Promise<unknown> {
-		return this.request<unknown>(
-			`/order/print/${id}`,
-			{
+	async printOrder(id: number): Promise<unknown> {
+		this.loading.set(true);
+
+		try {
+			const res = await fetch(`${this.baseUrl}/order/print/${id}`, {
 				method: "GET",
-			},
-			"Failed to print order",
-		);
+				headers: {
+					...this.headers,
+				},
+			});
+
+			if (res.status === 401) {
+				this.authService.logout();
+				this.router.navigate(["/login"]);
+				throw new Error("Unauthorized");
+			}
+
+			return res.ok;
+		} catch (error) {
+			console.error("Failed to print order:", error);
+			throw new Error("Failed to print order");
+		} finally {
+			this.loading.set(false);
+		}
 	}
 }

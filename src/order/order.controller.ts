@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/style/useImportType: <nest> */
-import { Body, Controller, Delete, Get, Header, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
 import { ApiHeader } from "@nestjs/swagger";
 import { UserGuard } from "../user/user.guard";
 import { CreateOrderDto } from "./dto/create-order.dto";
@@ -26,14 +26,7 @@ export class OrderController {
 	@ApiHeader({ name: "Authorization", description: "Bearer token", required: true })
 	@Get("print/:id")
 	async printOrder(@Param("id", ParseIntPipe) id: number) {
-		return await this.orderService.printOrder(id);
-	}
-
-	@ApiHeader({ name: "Authorization", description: "Bearer token", required: true })
-	@Header("Content-Type", "text/html; charset=utf-8")
-	@Get("print-html/:id")
-	async printOrderHtml(@Param("id", ParseIntPipe) id: number) {
-		return await this.orderService.printOrderHtml(id);
+		return await this.orderService.renderOrderReceiptImage(id);
 	}
 
 	@ApiHeader({ name: "Authorization", description: "Bearer token", required: true })
