@@ -1,8 +1,10 @@
 /** biome-ignore-all lint/style/useImportType: <nest> */
 import fs, { readFile } from "node:fs/promises";
+import net from "node:net";
 import path from "node:path";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import iconv from "iconv-lite";
 import { BreakLine, CharacterSet, PrinterTypes, ThermalPrinter } from "node-thermal-printer";
 import puppeteer from "puppeteer";
 import { PrismaService } from "../prisma/prisma.service";
@@ -102,11 +104,23 @@ export class OrderService {
 			type: printerType,
 			interface: `tcp://${printerIp}:${printerPort}`,
 			width: 42,
-			characterSet: CharacterSet.WPC1253_GREEK,
+			characterSet: CharacterSet.PC737_GREEK,
 			breakLine: BreakLine.WORD,
 			removeSpecialCharacters: false,
 			lineCharacter: "-",
 		});
+
+		const p = printer as any;
+
+		p.printer.config.CODE_PAGE_PC737_GREEK = Buffer.from([0x1b, 0x74, 64]);
+		p.printer.config.CODE_PAGES.PC737_GREEK = "CP737";
+
+		// Re-apply charset with correct mapping
+		printer.clear();
+
+		// (optional debug - remove later)
+		const cmd = p.printer.config[`CODE_PAGE_${p.config.codePage}`];
+		console.log("ESC t value:", cmd?.[2]);
 
 		const isConnected = await printer.isPrinterConnected();
 
@@ -167,6 +181,36 @@ export class OrderService {
 		await printer.execute();
 
 		return order;
+	}
+
+	async testGreekRaw() {
+		async function sendRaw(printerIp: string, printerPort: number, buffer: Buffer): Promise<void> {
+			return new Promise((resolve, reject) => {
+				const socket = net.createConnection(printerPort, printerIp, () => {
+					socket.write(buffer);
+					socket.end();
+				});
+
+				socket.on("close", () => resolve());
+				socket.on("error", reject);
+			});
+		}
+
+		const printerIp = this.config.getOrThrow<string>("PRINTER_IP");
+		const printerPort = this.config.getOrThrow<number>("PRINTER_PORT");
+
+		const data = Buffer.concat([
+			Buffer.from([0x1b, 0x40]), // init
+			Buffer.from([0x1b, 0x74, 64]), // codepage 64
+			iconv.encode("Καλημέρα Ελλάδα\n", "cp737"),
+			iconv.encode("ΔΕΛΤΙΟ ΠΑΡΑΛΑΒΗΣ ΕΠΙΣΚΕΥΗΣ\n", "cp737"),
+			Buffer.from("\n\n"),
+			Buffer.from([0x1d, 0x56, 0x00]), // cut
+		]);
+
+		await sendRaw(printerIp, printerPort, data);
+
+		console.log("Printed via raw TCP");
 	}
 
 	async printOrderNew(id: number) {

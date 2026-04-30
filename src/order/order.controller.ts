@@ -26,7 +26,7 @@ export class OrderController {
 	@ApiHeader({ name: "Authorization", description: "Bearer token", required: true })
 	@Get("print/:id")
 	async printOrder(@Param("id", ParseIntPipe) id: number) {
-		return await this.orderService.renderOrderReceiptImage(id);
+		return await this.orderService.printOrder(id);
 	}
 
 	@ApiHeader({ name: "Authorization", description: "Bearer token", required: true })
